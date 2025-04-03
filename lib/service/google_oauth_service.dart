@@ -1,4 +1,4 @@
-import 'package:login/service/oauth_service.dart';
+import 'package:push_notification/service/oauth_service.dart';
 
 class GoogleOAuthService extends OAuthService {
 

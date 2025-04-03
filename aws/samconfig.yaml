@@ -11,14 +11,14 @@ test:
   deploy:
     parameters:
       <<: *common_params
-      s3_prefix: 'test-flutter-google-login'
-      stack_name: 'test-flutter-google-login'
+      s3_prefix: 'test-flutter-aws-push-notification'
+      stack_name: 'test-flutter-aws-push-notification'
       parameter_overrides:
         - Env="test"
-        - ProjectName="flutter-google-login"
-        - UserPoolDomainName="flutter-google-login"
-        - UserPoolName="flutter-google-login"
-        - GoogleClientId="875140145521-q6jrqas6aedbc1js7n00oss74079i6g8.apps.googleusercontent.com"
+        - ProjectName="test-flutter-aws-push-notification"
+        - UserPoolDomainName="test-flutter-aws-push-notification"
+        - UserPoolName="test-flutter-aws-push-notification"
+        - PushNotificationPlatformArn="arn:aws:sns:eu-central-1:735523598888:app/GCM/test-push-notification"
       tags:
         - 'Environment=test'
-        - 'ProjectName=flutter-google-login'
+        - 'ProjectName=test-flutter-aws-push-notification'

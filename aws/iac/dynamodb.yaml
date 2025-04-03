@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: DynamoDB tables
+
+Parameters:
+  Env:
+    Type: String
+    Default: dev
+
+Resources:
+
+  # table containig the push notification sent to the devices
+  PushNotification:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Env}-push-notification
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: insertAt
+          AttributeType: N
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: insertAt
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: expiration
+        Enabled: 'TRUE'
+ 
+  # table containig the push token used by GCM to send push notifications
+  PushNotificationToken:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Env}-push-notification-token
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: pushToken
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: PushTokenIndex
+          KeySchema:
+            - AttributeName: pushToken
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+Outputs:
+
+  PushNotificationTokenName:
+    Description: PushNotificationToken table name
+    Value: !Ref PushNotificationToken
+  PushNotificationTokenArn:
+    Description: Push notification token table ARN
+    Value: !GetAtt PushNotificationToken.Arn
+  PushNotificationName:
+    Description: PushNotification table name
+    Value: !Ref PushNotification
+  PushNotificationArn:
+    Description: Push notification table ARN
+    Value: !GetAtt PushNotification.Arn

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:login/pages/get_started_screen.dart';
-import 'package:login/pages/logged_screen.dart';
+import 'package:push_notification/pages/get_started_screen.dart';
+import 'package:push_notification/pages/logged_screen.dart';
 
 class AppRouter {
   Route onGenerateRoute(RouteSettings routeSettings) {
@@ -10,7 +10,7 @@ class AppRouter {
       case '/guest':
         return MaterialPageRoute(
             builder: (_) => GetStartedScreen(
-                  title: "Test login",
+                  title: "Test push_notification",
                 ));
 
       case '/customer':
@@ -20,7 +20,7 @@ class AppRouter {
       default:
         return MaterialPageRoute(
             builder: (_) => GetStartedScreen(
-                  title: "Test login",
+                  title: "Test push_notification",
                 ));
     }
   }

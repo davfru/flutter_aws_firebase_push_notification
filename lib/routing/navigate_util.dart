@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login/main.dart';
+import 'package:push_notification/main.dart';
 
 class NavigateUtil {
   void navigateToView(String routeName,

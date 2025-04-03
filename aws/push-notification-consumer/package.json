@@ -1,0 +1,34 @@
+{
+    "name": "push-notification-consumer",
+    "version": "1.0.0",
+    "description": "Consume SQS queue and send push notification",
+    "main": "app.js",
+    "author": "Davide Fruci",
+    "scripts": {
+        "unit": "export NODE_ENV=test && env-cmd mocha '**/**/_tests/unit/*.spec.ts'",
+        "lint": "eslint '*.ts' --quiet --fix",
+        "compile": "tsc",
+        "test": "npm run compile && npm run unit"
+    },
+    "dependencies": {
+        "@aws-sdk/client-sqs": "3.637.0",
+        "@aws-sdk/client-sns": "3.637.0",
+        "@aws-sdk/lib-dynamodb": "^3.600.0",
+        "@aws-sdk/client-dynamodb": "^3.600.0",
+        "esbuild": "^0.14.14"
+    },
+    "devDependencies": {
+        "@types/aws-lambda": "^8.10.92",
+        "@types/mocha": "^10.0.6",
+        "@types/node": "^20.14.2",
+        "@types/sinon": "^17.0.3",
+        "@typescript-eslint/eslint-plugin": "^5.10.2",
+        "@typescript-eslint/parser": "^5.10.2",
+        "chai": "^5.1.0",
+        "env-cmd": "^10.1.0",
+        "mocha": "^10.3.0",
+        "sinon": "^17.0.1",
+        "tsx": "^4.15.2",
+        "typescript": "^4.8.4"
+    }
+}

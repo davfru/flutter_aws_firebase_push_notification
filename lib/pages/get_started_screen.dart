@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:login/theme/app_colors.dart';
-import 'package:login/components/landing_content.dart';
-import 'package:login/components/login.dart';
+import 'package:push_notification/theme/app_colors.dart';
+import 'package:push_notification/components/landing_content.dart';
+import 'package:push_notification/components/login.dart';
 
 class GetStartedScreen extends StatefulWidget {
   const GetStartedScreen({super.key, required this.title});

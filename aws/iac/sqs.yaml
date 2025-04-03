@@ -1,0 +1,153 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Sqs resources
+
+Globals:
+  Function:
+    Timeout: 30
+    Environment:
+      Variables:
+        REGION: !Ref Region
+        ENV: !Ref Env
+        PUSH_NOTIFICATION_TOKEN_TABLE: !Ref PushNotificationTokenName
+
+Parameters:
+  Env:
+    Type: String
+    Default: dev
+  Region:
+    Type: String
+    Default: eu-central-1
+  PushNotificationName:
+    Type: String
+  PushNotificationTokenName:
+    Type: String
+  PushNotificationPlatformArn:
+    Type: String
+
+Resources:
+
+  ###########################
+  # Push Notification Queue #
+  ###########################
+
+  PushNotificationQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: !Sub ${Env}-push-notification-queue
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt PushNotificationDLQ.Arn
+        maxReceiveCount: 5
+
+  PushNotificationDLQ:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: !Sub ${Env}-push-notification-queue-dlq
+
+  PushNotificationConsumer:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: false
+        EntryPoints:
+        - app.ts
+    Properties:
+      Handler: app.lambdaHandler
+      CodeUri: ../push-notification-consumer/
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Description: This lambda is used to consume PushNotificationQueue to send messages via AWS Platform Application
+      Events:
+        ConsumePushNotificationEvents:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt PushNotificationQueue.Arn
+            BatchSize: 10
+      Environment:
+        Variables:
+          PUSH_NOTIFICATION_TABLE: !Ref PushNotificationName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PushNotificationTokenName
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PushNotificationName
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: !Ref PushNotificationPlatformArn
+
+  PushNotificationConsumerGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join [ "", [ "/aws/lambda/", !Ref PushNotificationConsumer] ]
+      RetentionInDays: 30
+
+  ######################
+  # Subscription Queue #
+  ######################
+
+  PushNotificationSubscriptionQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: !Sub ${Env}-push-notification-subscription-queue
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt PushNotificationSubscriptionDLQ.Arn
+        maxReceiveCount: 5
+
+  PushNotificationSubscriptionDLQ:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: !Sub ${Env}-push-notification-subscription-queue-dlq
+
+  ######################
+  # Subscription Queue #
+  ######################
+
+  PushNotificationSubscriptionConsumer:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        Sourcemap: false
+        EntryPoints:
+        - app.ts
+    Properties:
+      Handler: app.lambdaHandler
+      CodeUri: ../push-notification-subscription-consumer/
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      Description: SQS consumer to send subscription to push notification
+      Events:
+        ConsumePushNotificationEvents:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt PushNotificationSubscriptionQueue.Arn
+            BatchSize: 10
+      Environment:
+        Variables:
+          SNS_PLATFORM_APPLICATION_ARN: !Ref PushNotificationPlatformArn
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PushNotificationTokenName
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - sns:CreatePlatformEndpoint
+                - sns:DeleteEndpoint
+              Resource: !Ref PushNotificationPlatformArn
+
+  PushNotificationSubscriptionConsumerGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join [ "", [ "/aws/lambda/", !Ref PushNotificationSubscriptionConsumer] ]
+      RetentionInDays: 30

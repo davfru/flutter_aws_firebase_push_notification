@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:login/bloc/auth/auth_model.dart';
+import 'package:push_notification/bloc/auth/auth_model.dart';
 
 abstract class OAuthService {
   final String clientId;

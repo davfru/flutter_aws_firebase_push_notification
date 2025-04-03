@@ -1,7 +1,7 @@
-import 'package:login/bloc/auth/auth_model.dart';
-import 'package:login/bloc/auth/auth_status.dart';
-import 'package:login/cache/auth_cache_manager.dart';
-import 'package:login/service/oauth_service.dart';
+import 'package:push_notification/bloc/auth/auth_model.dart';
+import 'package:push_notification/bloc/auth/auth_status.dart';
+import 'package:push_notification/cache/auth_cache_manager.dart';
+import 'package:push_notification/service/oauth_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';

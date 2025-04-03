@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:login/theme/app_colors.dart';
-import 'package:login/bloc/auth/auth_bloc.dart';
-import 'package:login/theme/gaps.dart';
+import 'package:push_notification/theme/app_colors.dart';
+import 'package:push_notification/bloc/auth/auth_bloc.dart';
+import 'package:push_notification/theme/gaps.dart';
 
 class LoggedScreen extends StatelessWidget {
   const LoggedScreen({super.key});

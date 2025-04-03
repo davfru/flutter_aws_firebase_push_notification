@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login/theme/app_colors.dart';
+import 'package:push_notification/theme/app_colors.dart';
 
 class LandingContent extends StatelessWidget {
   const LandingContent({Key? key, required this.onGetStarted}) : super(key: key);

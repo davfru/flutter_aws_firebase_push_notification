@@ -47,11 +47,8 @@ Prerequisites:
         ```sh
         flutterfire configure --project=test-flutter-aws-push-not --platforms=android --android-package-name=com.example.push_notification.dev
         ```
-
-    4. configure Google as Sign-in provider in Firebase
-        - in Firebase console, on the left side menu, choose *Project categories > Build > Authentication > Sign-in method* and under *Sign-in provider* select *Additional providers > Google*
         
-    5. in firebase under Project settings > Your apps provide SHA certificate by clicking on *Add fingerprint* and as value provide:
+    4. in firebase under Project settings > Your apps provide SHA certificate by clicking on *Add fingerprint* and as value provide:
         - for testing purpose only (our case)
 
             ```sh 
@@ -61,51 +58,24 @@ Prerequisites:
 
             use SHA1 value printed in the console
 
-        - for release only (**you can skip this step in our case**)
-            - to create a key store (inside android/app folder)
+            if you receive an error like this one:
 
-                ```sh
-                keytool -genkey -v -keystore my-release-key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias my-key-alias
-                ```
+            ```
+            > Task :url_launcher_android:signingReport
+            Variant: debugAndroidTest
+            Config: debug
+            Store: /root/.android/debug.keystore
+            Alias: AndroidDebugKey
+            Error: Missing keystore
+            ```
 
-                for testing (ONLY) purposes we can use 'password' as password
+            then run:
 
-            - to obtain SHA-1 key store
+            ```sh
+            keytool -genkey -v -keystore ~/.android/debug.keystore -keyalg RSA -keysize 2048 -validity 10000 -alias androiddebugkey -storepass android -keypass android
+            ```
 
-                ```sh
-                keytool -list -v -keystore my-release-key.jks -alias my-key-alias
-                ```
-
-            - use SHA1 value printed in the console
-
-            - modify *android/gradle.properties* adding
-
-                ```
-                storeFile=my-release-key.jks
-                storePassword=password
-                keyAlias=my-key-alias
-                keyPassword=password
-                ```
-
-            - modify *android/app/build.gradle* adding
-
-                ```
-                signingConfigs {
-                    release {
-                        storeFile file(project.property("storeFile"))
-                        storePassword project.property("storePassword")
-                        keyAlias project.property("keyAlias")
-                        keyPassword project.property("keyPassword")
-                    }
-                }
-                buildTypes {
-                    release {
-                        signingConfig signingConfigs.release
-                    }
-                }
-                ```
-
-    6. download google-services.json and replace it in android/app/google-services.json
+    5. download google-services.json and replace it in android/app/google-services.json
 
 ### 2. Deploy the infrastructure on AWS
 
@@ -113,36 +83,26 @@ Prerequisites:
 
 2. configure aws cli by running ```aws configure```
 
-3. update *aws/samconfig.yaml* modifying:
-    - *GoogleClientId* giving as value the *client_id* located within the "client" section of the google-sevices.json file (use the web client one)
-    
-4. create a secret on AWS Secret manager for *GoogleClientSecret* giving as value the *secret* that you can download directly from Google Cloud > Google Auth Platform
+3. create manually the push notification platform on aws (unfortunately, at the moment, it cannot be created via iac)
+    - open Firebase > Project Settings > Service accounts and click on "Generate new private key", download and secretly store the json file
+    - go to SNS and create a new platform application:
+        - use FCM as push notification platform
+        - choose Token as Authentication method and upload the json file previously downloded
+        - create the plaform
 
-    ```sh
-        aws secretsmanager create-secret \
-        --name GoogleClientSecret \
-        --description "Google OAuth client secret (test project)" \
-        --secret-string 'your-google-client-secret'
-    ```
+4. open ```aws/samconfig.yaml``` and modify *PushNotificationPlatformArn* parameter value with the arn of the platform just created.
 
 5. deploy aws
 
     ```sh
     cd aws
-    sam build
-    sam deploy --config-env "test"
+    sam build && sam deploy --config-env "test"
     ```
-
-6. now configure Cognito IDP on Google following the instruction [here](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-social-idp.html) following *Step 1: Register with a social IdP (To register an app with Google)* and *Step 2: Add a social IdP to your user pool* steps
-
 
 ### 3. Run the app
 
 #### Run the app on an Android device
 
-- modify assets/config/.env.dev values:
-    - COGNITO_DOMAIN (in AWS Cognito > Branding > Domain)
-    - COGNITO_CLIENT_ID (in AWS Cognito > Applications > App clients)
 - connect your device via Debug WiFi
 - run the configuration (in my case) *moto g 5g plus (debug)*
 

@@ -16,16 +16,25 @@ Parameters:
   UserPoolName:
     Type: String
     Description: User pool name
-  GoogleClientId:
+  PushNotificationPlatformArn:
     Type: String
-    Description: Google OAuth Client ID
+
 Resources:
-  Cognito:
+
+  SQS:
     Type: AWS::Serverless::Application
     Properties:
-      Location: ./iac/cognito.yaml
+      Location: ./iac/sqs.yaml
       Parameters:
-        UserPoolDomainName: !Ref UserPoolDomainName
-        UserPoolName: !Sub "${Env}-${UserPoolName}"
-        GoogleClientId: !Ref GoogleClientId
         Env: !Ref Env
+        PushNotificationName: !GetAtt DynamoDB.Outputs.PushNotificationName
+        PushNotificationTokenName: !GetAtt DynamoDB.Outputs.PushNotificationTokenName
+        PushNotificationPlatformArn: !Ref PushNotificationPlatformArn
+  
+  DynamoDB:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: ./iac/dynamodb.yaml
+      Parameters:
+        Env: !Ref Env
+

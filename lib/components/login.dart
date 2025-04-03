@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:login/components/icon_wrap.dart';
-import 'package:login/theme/app_colors.dart';
-import 'package:login/bloc/auth/auth_bloc.dart';
-import 'package:login/service/google_oauth_service.dart';
+import 'package:push_notification/components/icon_wrap.dart';
+import 'package:push_notification/theme/app_colors.dart';
+import 'package:push_notification/bloc/auth/auth_bloc.dart';
+import 'package:push_notification/service/google_oauth_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Login extends StatelessWidget {

@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:login/bloc/auth/auth_bloc.dart';
-import 'package:login/bloc/auth/auth_status.dart';
-import 'package:login/cache/auth_cache_manager.dart';
-import 'package:login/env_config.dart';
-import 'package:login/routing/app_router.dart';
-import 'package:login/routing/navigate_util.dart';
-import 'package:login/service/google_oauth_service.dart';
+import 'package:push_notification/bloc/auth/auth_bloc.dart';
+import 'package:push_notification/bloc/auth/auth_status.dart';
+import 'package:push_notification/cache/auth_cache_manager.dart';
+import 'package:push_notification/env_config.dart';
+import 'package:push_notification/routing/app_router.dart';
+import 'package:push_notification/routing/navigate_util.dart';
+import 'package:push_notification/service/google_oauth_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
