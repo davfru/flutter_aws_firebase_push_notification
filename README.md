@@ -36,7 +36,7 @@ Prerequisites:
         and follow the wizard, particularly:
 
         - select at least one service from those seggested, for example *Functions* we'll delete it later since we don't need it.
-        - choose *Crate new project* option and give it the name *test-federation-login*
+        - choose *Crate new project* option and give it the name *test-flutter-aws-push-not*
 
         after Firebase has been created, delete the following resources:
         - firebase.json (will be created again in the next step)
@@ -45,7 +45,7 @@ Prerequisites:
     3. configure flutterfire
 
         ```sh
-        flutterfire configure --project=test-federation-login --platforms=android --android-package-name=com.example.login.dev
+        flutterfire configure --project=test-flutter-aws-push-not --platforms=android --android-package-name=com.example.push_notification.dev
         ```
 
     4. configure Google as Sign-in provider in Firebase

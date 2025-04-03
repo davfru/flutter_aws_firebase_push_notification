@@ -1,4 +1,4 @@
-package com.example.login
+package com.example.push_notification
 
 import io.flutter.embedding.android.FlutterActivity
 
