@@ -1,86 +1,81 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:push_notification/theme/app_colors.dart';
-import 'package:push_notification/components/landing_content.dart';
-import 'package:push_notification/components/login.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class GetStartedScreen extends StatefulWidget {
-  const GetStartedScreen({super.key, required this.title});
-  final String title;
+  const GetStartedScreen({super.key});
 
   @override
   State<GetStartedScreen> createState() => _GetStartedScreenState();
 }
 
 class _GetStartedScreenState extends State<GetStartedScreen> {
-  late PageController _pageController;
-  double _progress = 0;
+  String? pushToken;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController()
-      ..addListener(() {
-        setState(() {
-          _progress = _pageController.page ?? 0;
-        });
-      });
+    _getPushToken();
+  }
+
+  Future<void> _getPushToken() async {
+    final token = await FirebaseMessaging.instance.getToken();
+    setState(() {
+      pushToken = token;
+    });
+    log("push token: $pushToken");
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.lightBlue,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 250),
-              child: Center(
-                child: Image.asset(
-                  "assets/images/bg.png",
-                  width: MediaQuery.of(context).size.width *
-                      0.7, // Adjust the width as needed
-                  height: MediaQuery.of(context).size.height *
-                      0.5, // Adjust the height as needed
-                  fit: BoxFit.contain,
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/images/notification.png',
+                width: 150,
+                height: 100,
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Push Notifications',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                height:
-                    MediaQuery.of(context).size.height * 0.35 + _progress * 150,
-                child: Column(
+              const SizedBox(height: 12),
+              if (pushToken != null)
+                Column(
                   children: [
-                    Expanded(
-                        child: PageView(
-                      controller: _pageController,
-                      children: [
-                        LandingContent(onGetStarted: () {
-                          _pageController.animateToPage(
-                            1,
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.ease,
-                          );
-                        }),
-                        Login(),
-                      ],
-                    ))
+                    const Text(
+                      'Push token:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      pushToken!,
+                      style: const TextStyle(
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ],
-                )),
-          )
-        ],
+                )
+              else
+                const CircularProgressIndicator(),
+            ],
+          ),
+        ),
       ),
     );
   }

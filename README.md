@@ -1,6 +1,6 @@
-# OAuth Login Flow with Flutter + AWS Cognito + Google
+# How to send push notification to your Flutter app with Firebase and AWS
 
-This project contains the source code for both backend and mobile (flutter). It allows to run a fully functional app to log in via Google using AWS Cognito IDP (OAuth 2.0).
+In this demo we're going to build a serverless solution on AWS to send push notifications to your Flutter app using Firebase.
 
 ![preview](./preview.gif)
 
@@ -77,6 +77,13 @@ Prerequisites:
 
     5. download google-services.json and replace it in android/app/google-services.json
 
+    6. configure flutter fire for GCM
+
+    ```sh
+    firebase login
+    flutterfire configure
+    ```
+
 ### 2. Deploy the infrastructure on AWS
 
 1. open the project in dev container
@@ -145,3 +152,35 @@ to run in debug mode add the following config inside .vscode/launch.json
   ]
 }
 ```
+
+### 4. Send push notification in action
+
+1. send the following message to *PushNotificationSubscriptionQueue* queue
+
+```json
+{
+  "event": "UPSERT_PUSH_TOKEN",
+  "payload": {
+    "pushToken": "xyz", // token from Firebase
+    "os": "android",
+    "receiverId": "1234" // unique identifier (email or cognito sub for example)
+  }
+}
+```
+
+this message triggers the following flow which allows Firebase to register the device (pushToken) ready to receive push notifications
+
+![preview](./doc/push_subscription.drawio.png)
+
+2. send the message json to *PushNotificationQueue* queue
+
+```json
+{
+  "Type": "Notification",
+  "Message": "{\"event\":\"CUSTOMER_BOOK_APPOINTMENT\",\"data\":{\"customerName\":\"Davide\",\"appointmentId\":117,\"receiverId\":\"1234\",\"appointmentDate\":\"2024-11-19T17:00:00+00:00\"}}"
+}
+```
+
+this message triggers the following flow which Firebase  to send push notification to the device associated with receiverId
+
+![preview](./doc/push_consumer.drawio.png)

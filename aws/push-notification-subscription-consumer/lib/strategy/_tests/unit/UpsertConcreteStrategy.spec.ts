@@ -20,17 +20,17 @@ describe('UpsertPushSubscriptionStrategy', () => {
         sinon.restore();
     });
 
-    it('should delete and create a new token (found by sub)', async () => {
+    it('should delete and create a new token (found by receiverId)', async () => {
         const message: MessageBody = {
             event: "UPSERT_PUSH_TOKEN",
             payload: {
-                sub: 'user123',
+                receiverId: 'user123',
                 pushToken: 'same-token',
                 os: 'iOS'
             }
         };
 
-        // Stub the DynamoDB GetCommand to return a record for the sub
+        // Stub the DynamoDB GetCommand to return a record for the receiverId
         dynamoDbClientStub.send.withArgs(sinon.match.instanceOf(GetCommand)).resolves({
             Item: { id: 'user123', pushToken: 'same-token', snsEndpointArn: 'arn:old' }
         });
@@ -42,7 +42,7 @@ describe('UpsertPushSubscriptionStrategy', () => {
         await strategy.processMessage(message);
 
         // Assertions
-        sinon.assert.calledWith(dynamoDbClientStub.send, sinon.match.instanceOf(GetCommand)); // Check by sub
+        sinon.assert.calledWith(dynamoDbClientStub.send, sinon.match.instanceOf(GetCommand)); // Check by receiverId
         sinon.assert.calledWith(snsClientStub.send, sinon.match.instanceOf(DeleteEndpointCommand)); // Delete old SNS endpoint
         sinon.assert.calledWith(snsClientStub.send, sinon.match.instanceOf(CreatePlatformEndpointCommand)); // Create new SNS endpoint
         sinon.assert.calledWith(dynamoDbClientStub.send, sinon.match.instanceOf(PutCommand)); // Insert new record
@@ -52,13 +52,13 @@ describe('UpsertPushSubscriptionStrategy', () => {
         const message: MessageBody = {
             event: "UPSERT_PUSH_TOKEN",
             payload: {
-                sub: 'user123',
+                receiverId: 'user123',
                 pushToken: 'different-token',
                 os: 'Android'
             }
         };
 
-        // Stub the DynamoDB GetCommand to return no record for the sub
+        // Stub the DynamoDB GetCommand to return no record for the receiverId
         dynamoDbClientStub.send.withArgs(sinon.match.instanceOf(GetCommand)).resolves({ Item: undefined });
 
         // Stub the DynamoDB QueryCommand to return a record for the pushToken
@@ -73,7 +73,7 @@ describe('UpsertPushSubscriptionStrategy', () => {
         await strategy.processMessage(message);
 
         // Assertions
-        sinon.assert.calledWith(dynamoDbClientStub.send, sinon.match.instanceOf(GetCommand)); // First attempt by sub
+        sinon.assert.calledWith(dynamoDbClientStub.send, sinon.match.instanceOf(GetCommand)); // First attempt by receiverId
         sinon.assert.calledWith(dynamoDbClientStub.send, sinon.match.instanceOf(QueryCommand)); // Second attempt by pushToken
         sinon.assert.calledWith(snsClientStub.send, sinon.match.instanceOf(DeleteEndpointCommand)); // Delete old SNS endpoint
         sinon.assert.calledWith(snsClientStub.send, sinon.match.instanceOf(CreatePlatformEndpointCommand)); // Create new SNS endpoint
@@ -84,7 +84,7 @@ describe('UpsertPushSubscriptionStrategy', () => {
         const message: MessageBody = {
             event: "UPSERT_PUSH_TOKEN",
             payload: {
-                sub: 'user123',
+                receiverId: 'user123',
                 pushToken: 'new-token',
                 os: 'iOS'
             }
@@ -109,13 +109,13 @@ describe('UpsertPushSubscriptionStrategy', () => {
         const message: MessageBody = {
             event: "UPSERT_PUSH_TOKEN",
             payload: {
-                sub: 'user789',
+                receiverId: 'user789',
                 pushToken: 'new-token',
                 os: 'Android'
             }
         };
 
-        // Stub DynamoDB to return no record for both sub and pushToken
+        // Stub DynamoDB to return no record for both receiverId and pushToken
         dynamoDbClientStub.send.withArgs(sinon.match.instanceOf(GetCommand)).resolves({ Item: undefined });
         dynamoDbClientStub.send.withArgs(sinon.match.instanceOf(QueryCommand)).resolves({ Items: [] });
 
@@ -125,7 +125,7 @@ describe('UpsertPushSubscriptionStrategy', () => {
         await strategy.processMessage(message);
 
         // Assertions
-        sinon.assert.calledWith(dynamoDbClientStub.send, sinon.match.instanceOf(GetCommand)); // Check by sub
+        sinon.assert.calledWith(dynamoDbClientStub.send, sinon.match.instanceOf(GetCommand)); // Check by receiverId
         sinon.assert.calledWith(dynamoDbClientStub.send, sinon.match.instanceOf(QueryCommand)); // Check by pushToken
         sinon.assert.calledWith(snsClientStub.send, sinon.match.instanceOf(CreatePlatformEndpointCommand)); // Create new SNS endpoint
         sinon.assert.calledWith(dynamoDbClientStub.send, sinon.match.instanceOf(PutCommand)); // Insert new record

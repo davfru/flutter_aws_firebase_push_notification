@@ -8,7 +8,7 @@ export class CustomerBookAppointmentPushStrategy extends PushAbstractStrategy {
     }
 
     isValidMessage(message: CustomerBookAppointmentSqsMessagePayload): boolean {
-        return message.data.specialistCognitoId != null;
+        return message.data.receiverId != null;
     }
 
     getPushNotificationType(): PushNotificationType {
@@ -16,7 +16,7 @@ export class CustomerBookAppointmentPushStrategy extends PushAbstractStrategy {
     }
 
     getPushNotificationReceiver(message: CustomerBookAppointmentSqsMessagePayload): string[] {
-        return [message.data.specialistCognitoId];
+        return [message.data.receiverId];
     }
 
     async getPushNotificationPayloadMetadata(message: CustomerBookAppointmentSqsMessagePayload): Promise<CustomerBookAppointmentPushNotificationPayloadMetadata> {
@@ -32,8 +32,8 @@ export class CustomerBookAppointmentPushStrategy extends PushAbstractStrategy {
     // TODO translate by lang
     getPushNotificationPayload(metadata: CustomerBookAppointmentPushNotificationPayloadMetadata): CustomerBookAppointmentPushNotificationPayload {
         return {
-            title: "Richiesta nuovo appuntamento",
-            body: `${metadata.customerName} ha richiesto un appuntamento per il giorno ${new Date(metadata.appointmentStartAt).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}.`
+            title: "New appointment request",
+            body: `${metadata.customerName} requested new appointment for ${new Date(metadata.appointmentStartAt)}.`
         }
     }
 }

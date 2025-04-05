@@ -1,6 +1,5 @@
-export type ShopAppontmentPushNotificationType = "SHOP_CREATE_APPOINTMENT" | "SHOP_CONFIRMED_APPOINTMENT" | "SHOP_DELETE_APPOINTMENT"
-export type CustomerAppontmentPushNotificationType = "CUSTOMER_BOOK_APPOINTMENT" | "CUSTOMER_DELETE_APPOINTMENT" | "CUSTOMER_APPOINTMENT_ONE_DAY_LEFT_REMINDER"
-export type PushNotificationType = ShopAppontmentPushNotificationType | CustomerAppontmentPushNotificationType;
+export type CustomerAppontmentPushNotificationType = "CUSTOMER_BOOK_APPOINTMENT"
+export type PushNotificationType = CustomerAppontmentPushNotificationType;
 
 // ===========================================
 
@@ -8,66 +7,11 @@ export interface SqsMessagePayload {
     event: PushNotificationType
 }
 
-export interface ShopCreateAppointmentSqsMessagePayload extends SqsMessagePayload {
-    data: {
-        shopId: string
-        appointmentId: number
-        shopName: string
-        customerId: string
-        customerCognitoId: string
-        appointmentDate: string
-        customerName: string
-        customerSurname: String
-        customerEmail: string
-        customerPhoneNumber: string
-        customerPhoneNumberPrefix: string
-    }
-}
-
-export interface ShopConfirmedAppointmentSqsMessagePayload extends SqsMessagePayload {
-    data: {
-        appointmentId: number
-        customerCognitoId: string
-        shopName: string
-        appointmentDate: string
-    }
-}
-
-export interface ShopDeletedAppointmentSqsMessagePayload extends SqsMessagePayload {
-    data: {
-        appointmentId: number
-        customerCognitoId: string
-        shopName: string
-        appointmentDate: string
-    }
-}
-
 export interface CustomerBookAppointmentSqsMessagePayload extends SqsMessagePayload {
     data: {
-        shopId: string
         customerName: string
         appointmentId: number
-        specialistCognitoId: string
-        appointmentDate: string
-    }
-}
-
-export interface CustomerDeleteAppointmentSqsMessagePayload extends SqsMessagePayload {
-    data: {
-        shopId: string
-        customerName: string
-        appointmentId: number
-        specialistCognitoId: string
-        appointmentDate: string
-    }
-}
-
-export interface CustomerAppointmentOneDayLeftReminderSqsMessagePayload extends SqsMessagePayload {
-    data: {
-        appointmentId: number
-        shopId: string
-        shopName: string
-        customerCognitoId: string
+        receiverId: string
         appointmentDate: string
     }
 }
@@ -83,40 +27,11 @@ export interface AppointmentPushNotificationPayloadMetadata extends PushNotifica
     appointmentStartAt: string
 }
 
-// push sent to a customer by shop
-
-export interface ShopCreateAppointmentPushNotificationPayloadMetadata
-    extends AppointmentPushNotificationPayloadMetadata {
-    shopName: string
-}
-
-export interface ShopConfirmedAppointmentPushNotificationPayloadMetadata
-    extends AppointmentPushNotificationPayloadMetadata {
-    shopName: string
-}
-
-export interface ShopDeletedAppointmentPushNotificationPayloadMetadata
-    extends AppointmentPushNotificationPayloadMetadata {
-    shopName: string
-}
-
 // push sent to a shop by customer
 
 export interface CustomerBookAppointmentPushNotificationPayloadMetadata
     extends AppointmentPushNotificationPayloadMetadata {
     customerName: string
-}
-
-export interface CustomerDeleteAppointmentPushNotificationPayloadMetadata
-    extends AppointmentPushNotificationPayloadMetadata {
-    customerName: string
-}
-
-// scheduled push notification
-
-export interface CustomerAppointmentOneDayLeftReminderPushNotificationPayloadMetadata
-    extends AppointmentPushNotificationPayloadMetadata {
-    shopName: string
 }
 
 //----------------------------------------
@@ -126,27 +41,7 @@ export interface PushNotificationPayload {
     body: string
 }
 
-export interface ShopCreateAppointmentPushNotificationPayload
-    extends PushNotificationPayload {
-}
-
-export interface ShopConfirmedAppointmentPushNotificationPayload
-    extends PushNotificationPayload {
-}
-
-export interface ShopDeleteAppointmentPushNotificationPayload
-    extends PushNotificationPayload {
-}
-
 export interface CustomerBookAppointmentPushNotificationPayload
-    extends PushNotificationPayload {
-}
-
-export interface CustomerDeleteAppointmentPushNotificationPayload
-    extends PushNotificationPayload {
-}
-
-export interface CustomerAppointmentOneDayLeftReminderPushNotificationPayload
     extends PushNotificationPayload {
 }
 
@@ -155,7 +50,7 @@ export interface CustomerAppointmentOneDayLeftReminderPushNotificationPayload
 type MobileOs = "android" | "iOS";
 
 export interface PushNotificationSub {
-    id: string, // cognito sub
+    id: string, // email or cognito sub
     pushToken: string
     os: MobileOs,
     insertAt: number,

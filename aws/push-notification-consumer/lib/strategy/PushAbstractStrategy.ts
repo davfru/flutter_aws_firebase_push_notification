@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { SqsMessagePayload, PushNotificationSub, PushNotificationPayload, PushNotificationPayloadMetadata, PushNotificationType, PushNotificationDynamoDB, ShopCreateAppointmentSqsMessagePayload } from "../interfaces";
+import { SqsMessagePayload, PushNotificationSub, PushNotificationPayload, PushNotificationPayloadMetadata, PushNotificationType, PushNotificationDynamoDB } from "../interfaces";
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
 
@@ -20,7 +20,7 @@ export abstract class PushAbstractStrategy {
     abstract getPushNotificationType(): PushNotificationType;
 
     /**
-     * @returns cognito sub ids (a push notification can be sent to different receivers)
+     * @returns a list of ids (a push notification can be sent to different receivers)
      */
     abstract getPushNotificationReceiver(message: SqsMessagePayload): string[]
 
@@ -28,10 +28,10 @@ export abstract class PushAbstractStrategy {
 
     abstract getPushNotificationPayload(metadata: PushNotificationPayloadMetadata): PushNotificationPayload;
 
-    async getPushNotificationSub(cognitoSub: string): Promise<PushNotificationSub> {
+    async getPushNotificationSub(receiverId: string): Promise<PushNotificationSub> {
         const getParams = {
             TableName: PUSH_NOTIFICATION_TOKEN_TABLE,
-            Key: { id: cognitoSub },
+            Key: { id: receiverId },
         };
 
         console.log(`PushAbstractStrategy - getPushNotificationSub - params ${JSON.stringify(getParams)}`);
@@ -94,17 +94,17 @@ export abstract class PushAbstractStrategy {
     }
 
 
-    async persistPushNotification(cognitoSub: string,
+    async persistPushNotification(receiverId: string,
         payload: PushNotificationPayload,
         metadata: PushNotificationPayloadMetadata) {
         const insertAtInSeconds = parseInt(`${new Date().getTime() / 1000}`);
         const oneMonthsInSeconds = 1 * 30 * 24 * 60 * 60;
         const expiration = insertAtInSeconds + oneMonthsInSeconds;
-        
+
         const putParams = {
             TableName: PUSH_NOTIFICATION_TABLE,
             Item: {
-                id: cognitoSub,
+                id: receiverId,
                 insertAt: insertAtInSeconds,
                 expiration: expiration,
                 type: this.getPushNotificationType(),
@@ -117,7 +117,7 @@ export abstract class PushAbstractStrategy {
 
         try {
             await dynamoDbClient.send(new PutCommand(putParams));
-            console.log(`Notification log inserted into DynamoDB for id: ${cognitoSub}`);
+            console.log(`Notification log inserted into DynamoDB for id: ${receiverId}`);
         } catch (dynamoError) {
             console.error(`Failed to insert notification log into DynamoDB: ${dynamoError}`);
         }

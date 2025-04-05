@@ -1,17 +1,8 @@
 import { SQSEvent } from 'aws-lambda';
 import { SqsMessagePayload, PushNotificationSub } from './lib/interfaces';
 import { PushStrategyFactory } from './lib/strategy/PushStrategyFactory';
-// import { Pool } from 'pg';
-// import { initializePool } from './lib/pg';
-// 
-// let pool: Pool;
 
 export const lambdaHandler = async (event: SQSEvent): Promise<void> => {
-
-    // if (!pool) {
-    //     pool = await initializePool();
-    // } 
-    // const client = await pool.connect();
 
     try {
 
@@ -21,14 +12,8 @@ export const lambdaHandler = async (event: SQSEvent): Promise<void> => {
 
             // record.body:  {
             //     Type: 'Notification',
-            //     MessageId: 'ceb25f30-5155-5e97-ad72-0086fc6458b9',
-            //     TopicArn: 'arn:aws:sns:eu-central-1:735523598888:prod-taro-appointment-topic',
-            //     Message: '{"event":"CUSTOMER_BOOK_APPOINTMENT","data":{"shopId":"3ac03f4d-44a1-4e9d-8cb6-d48e8a59262b","customerName":"Davide","appointmentId":117,"specialistCognitoId":"2334d8a2-6091-70da-5b26-cd7bef287bea","appointmentDate":"2024-11-19T17:00:00+00:00"}}',
+            //     Message: '{"event":"CUSTOMER_BOOK_APPOINTMENT","data":{"customerName":"Davide","appointmentId":117,"receiverId":"2334d8a2-6091-70da-5b26-cd7bef287bea","appointmentDate":"2024-11-19T17:00:00+00:00"}}',
             //     Timestamp: '2024-11-19T15:12:49.673Z',
-            //     SignatureVersion: '1',
-            //     Signature: 'Z+2dCm58dzyY3gVH5at1y+6qRCupu3S8CQcvu+ywq6HUAahxYsLf92wMQ1kTfhVTsxQ5c5JXS8tA+nx8oQrasEx4luofitRN7hEzRhpvoaQxo8dhj9pn5PCYO/XrF5aTRY6r59vw7Df1RcEQHHGZD1H0wPQIcEM9/21Q95iWH3EdIdqGfT+tWmjAFAyRN0Ah8OmnLkujxmXqs/oPAhK5nYTyx9PhB3q8rz662gDao5be7RfLc8uTwPkl65jAxOGXZkbRhveu1vpDkWXzp3UlvxsOY+S4vdePjsqU1FsvLc76cB1OiWtUkxyRAgAlsQ7vGQuDKeQwtImMzOq/tWxRCw==',
-            //     SigningCertURL: 'https://sns.eu-central-1.amazonaws.com/SimpleNotificationService-9c6465fa7f48f5cacd23014631ec1136.pem',
-            //     UnsubscribeURL: 'https://sns.eu-central-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-central-1:735523598888:prod-taro-appointment-topic:7c5df6fc-5545-4216-817e-4190a1411b72'
             //   }
 
             const body = JSON.parse(record.body);
@@ -49,36 +34,36 @@ export const lambdaHandler = async (event: SQSEvent): Promise<void> => {
 
             // the receivers of push notification
             console.info("message valid");
-            const cognitoSubs: string[] = await strategy.getPushNotificationReceiver(sqsMessagePayload);
-            console.log(`cognitoSubs: ${cognitoSubs}`);
+            const pushReceivers: string[] = await strategy.getPushNotificationReceiver(sqsMessagePayload);
+            console.log(`pushReceivers: ${pushReceivers}`);
 
-            if (!cognitoSubs.length) {
+            if (!pushReceivers.length) {
                 console.log(`No receiver founds, returning...`);
                 return;
             }
 
-            for (let cognitoSub of cognitoSubs) {
-                const pushSub: PushNotificationSub = await strategy.getPushNotificationSub(cognitoSub);
+            for (let receiverId of pushReceivers) {
+                const pushSub: PushNotificationSub = await strategy.getPushNotificationSub(receiverId);
 
                 if (!pushSub || !pushSub.pushToken || !pushSub.snsEndpointArn) {
-                    console.error(`No pushToken or SNS Endpoint ARN found for sub: ${cognitoSub}`);
+                    console.error(`No pushToken or SNS Endpoint ARN found for receiverId: ${receiverId}`);
                     continue; // Skip to the next record if not found
                 }
 
                 const { pushToken } = pushSub;
-                console.log(`PushToken retrieved for sub ${cognitoSub}: ${pushToken}`);
+                console.log(`PushToken retrieved for receiverId ${receiverId}: ${pushToken}`);
 
                 const pushNotificationPayloadMetadata = await strategy.getPushNotificationPayloadMetadata(sqsMessagePayload);
 
                 const pushNotificationPayload = strategy.getPushNotificationPayload(pushNotificationPayloadMetadata);
 
-                await strategy.persistPushNotification(cognitoSub, pushNotificationPayload, pushNotificationPayloadMetadata);
-                console.log(`push notification persisted for ${cognitoSub}`);
+                await strategy.persistPushNotification(receiverId, pushNotificationPayload, pushNotificationPayloadMetadata);
+                console.log(`push notification persisted for ${receiverId}`);
 
                 await strategy.sendPushNotification(pushNotificationPayload,
                     pushNotificationPayloadMetadata,
                     pushSub);
-                console.log(`push notification sent to ${cognitoSub}`);
+                console.log(`push notification sent to ${receiverId}`);
             }
         }
 
@@ -86,6 +71,5 @@ export const lambdaHandler = async (event: SQSEvent): Promise<void> => {
         console.error('Error processing SQS event:', error);
         throw error;
     } finally {
-        // client.release();
     }
 };

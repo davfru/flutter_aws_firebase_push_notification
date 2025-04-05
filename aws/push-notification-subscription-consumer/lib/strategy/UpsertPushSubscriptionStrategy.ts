@@ -17,22 +17,22 @@ export class UpsertPushSubscriptionStrategy extends PushSubscriptionStrategy {
     }
 
     async processMessage(message: MessageBody): Promise<void> {
-        const { sub, pushToken, os } = message.payload;
+        const { receiverId, pushToken, os } = message.payload;
 
         let getItemResult;
         
-        // Step 1: Retrieve the existing record from DynamoDB by `sub`
+        // Step 1: Retrieve the existing record from DynamoDB by `receiverId`
         const getParamsBySub = {
             TableName: PUSH_NOTIFICATION_TOKEN_TABLE,
-            Key: { id: sub },
+            Key: { id: receiverId },
         };
         
         getItemResult = await dynamoDbClient.send(new GetCommand(getParamsBySub));
-        console.log(`Existing record for sub: ${getItemResult.Item}`);
+        console.log(`Existing record for receiverId: ${getItemResult.Item}`);
 
         let pushSub: PushNotificationSub = getItemResult.Item as PushNotificationSub;
 
-        // If no record is found by sub, try to find it by `pushToken` using GSI
+        // If no record is found by receiverId, try to find it by `pushToken` using GSI
         if (!pushSub) {
             const queryParamsByToken = {
                 TableName: PUSH_NOTIFICATION_TOKEN_TABLE,
@@ -77,7 +77,7 @@ export class UpsertPushSubscriptionStrategy extends PushSubscriptionStrategy {
             const endpointParams = {
                 PlatformApplicationArn: SNS_PLATFORM_APPLICATION_ARN,
                 Token: pushToken,
-                CustomUserData: sub,
+                CustomUserData: receiverId,
                 Enabled: "true",
             };
 
@@ -99,7 +99,7 @@ export class UpsertPushSubscriptionStrategy extends PushSubscriptionStrategy {
         const putParams = {
             TableName: PUSH_NOTIFICATION_TOKEN_TABLE,
             Item: {
-                id: sub,
+                id: receiverId,
                 pushToken,
                 os,
                 insertAt,
@@ -109,7 +109,7 @@ export class UpsertPushSubscriptionStrategy extends PushSubscriptionStrategy {
 
         try {
             await dynamoDbClient.send(new PutCommand(putParams));
-            console.log(`New record inserted/updated in DynamoDB for sub: ${sub}`);
+            console.log(`New record inserted/updated in DynamoDB for receiverId: ${receiverId}`);
         } catch (error) {
             console.error(`Error inserting record into DynamoDB: ${error}`);
             throw error;

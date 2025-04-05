@@ -5,12 +5,12 @@ export interface MessageBody {
     payload: {
         pushToken: string
         os: MobileOs,
-        sub: string
+        receiverId: string
     }
 }
 
 export interface PushNotificationSub {
-    id: string, // cognito sub
+    id: string, // email or cognito sub
     pushToken: string
     os: MobileOs,
     insertAt: number,
