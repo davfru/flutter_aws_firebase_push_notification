@@ -1,17 +1,8 @@
 import { SQSEvent } from 'aws-lambda';
 import { SqsMessagePayload, PushNotificationSub } from './lib/interfaces';
 import { PushStrategyFactory } from './lib/strategy/PushStrategyFactory';
-// import { Pool } from 'pg';
-// import { initializePool } from './lib/pg';
-// 
-// let pool: Pool;
 
 export const lambdaHandler = async (event: SQSEvent): Promise<void> => {
-
-    // if (!pool) {
-    //     pool = await initializePool();
-    // } 
-    // const client = await pool.connect();
 
     try {
 
@@ -86,6 +77,5 @@ export const lambdaHandler = async (event: SQSEvent): Promise<void> => {
         console.error('Error processing SQS event:', error);
         throw error;
     } finally {
-        // client.release();
     }
 };

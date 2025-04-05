@@ -77,6 +77,13 @@ Prerequisites:
 
     5. download google-services.json and replace it in android/app/google-services.json
 
+    6. configure flutter fire for GCM
+
+    ```sh
+    firebase login
+    flutterfire configure
+    ```
+
 ### 2. Deploy the infrastructure on AWS
 
 1. open the project in dev container

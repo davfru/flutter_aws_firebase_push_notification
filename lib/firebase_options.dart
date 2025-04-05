@@ -59,4 +59,5 @@ class DefaultFirebaseOptions {
     projectId: 'test-flutter-aws-push-not',
     storageBucket: 'test-flutter-aws-push-not.firebasestorage.app',
   );
+
 }
