@@ -18,7 +18,7 @@ test:
         - ProjectName="test-flutter-aws-push-notification"
         - UserPoolDomainName="test-flutter-aws-push-notification"
         - UserPoolName="test-flutter-aws-push-notification"
-        - PushNotificationPlatformArn="arn:aws:sns:eu-central-1:735523598888:app/GCM/test-push-notification"
+        - PushNotificationPlatformArn="arn:aws:sns:eu-central-1:xxxx:app/GCM/test-push-notification"
       tags:
         - 'Environment=test'
         - 'ProjectName=test-flutter-aws-push-notification'
